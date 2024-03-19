@@ -1,0 +1,254 @@
+mqtt:
+  host: 172.21.0.3
+  port: 1883
+  user: user
+  password: 'Password'
+
+
+detectors:
+  coral_usb:
+    type: edgetpu
+    device: usb
+  coral_pci:
+    type: edgetpu
+    device: pci
+
+ffmpeg:
+  hwaccel_args:
+    -hwaccel vaapi
+    -hwaccel_device /dev/dri/renderD128
+    -hwaccel_output_format yuv420p
+
+   # - -hwaccel
+   # - qsv
+   # - -c:v
+   # - h264_qsv
+ # output_args:
+   # detect: -f rawvideo -vf hwdownload,format=nv12 -pix_fmt yuv420p
+
+
+detect:
+  width: 704
+  height: 480
+  fps: 5
+  stationary:
+    interval: 1
+    threshold: 50
+objects:
+  track:
+    - person
+    - dog
+    - car
+    - bus
+    #- motorcycle
+    #- bicycle
+
+
+snapshots:
+  enabled: true
+  timestamp: true
+  bounding_box: true
+  retain:
+    default: 14
+
+
+record:
+  enabled: true
+  expire_interval: 11
+  retain:
+    days: 11
+  events:
+    retain:
+      default: 14
+      mode: motion
+    pre_capture: 5
+    post_capture: 15
+        
+
+cameras:
+  Little_Yard: # Little Yard
+    rtmp: # needed to use 2 streams
+      enabled: false
+
+    record:
+      enabled: true
+      retain:
+        days: 7   #store motion events for 7 days
+        mode: motion
+      events:
+        retain:
+          default: 14 #store ai detected objects for 14 days 
+          mode: active_objects
+        pre_capture: 5
+        post_capture: 15
+
+    motion:
+      mask:
+        - 198,0,201,80,88,74,93,0
+        - 221,96,315,95,313,0,215,0
+        - 0,341,178,269,110,173,0,161
+        - 621,274,592,327,489,282,504,219,550,200,600,224
+
+    ffmpeg:
+      inputs:
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=1 #substream
+          roles:
+            - detect
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=0 #mainstream
+          roles:
+            - record
+
+  Front: # Front
+    rtmp: # needed to use 2 streams
+      enabled: false
+
+    motion:
+      mask:
+        - 0,143,280,0,0,0
+
+    ffmpeg:
+      inputs:
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=1 #substream
+          roles:
+            - detect
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=0 #mainstream
+          roles:
+            - record
+
+  Driveway:
+    rtmp: # needed to use 2 streams
+      enabled: false
+
+    motion:
+      mask:
+        - 238,0,0,164,0,0
+
+    ffmpeg:
+      inputs:
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=1 #substream
+          roles:
+            - detect
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=0 #mainstream
+          roles:
+            - record
+
+  garage:
+    rtmp: # needed to use 2 streams
+      enabled: false
+
+    record:
+      enabled: true
+      retain:
+        days: 7   #store motion events for 7 days
+        mode: motion
+      events:
+        retain:
+          default: 14 #store ai detected objects for 14 days
+          mode: active_objects
+        pre_capture: 5
+        post_capture: 15
+    objects:
+      filters:
+        car:
+          mask:
+            - 68,313,172,140,250,86,350,96,402,164,373,409,308,480,76,427
+    #motion:
+    #  mask:
+    #    - 515,39,704,38,704,0,513,0 #mask out timestamp
+    ffmpeg:
+      inputs:
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=1 #substream
+          roles:
+            - detect
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=0 #mainstream
+          roles:
+            - record
+
+  Barn:
+    rtmp: # needed to use 2 streams
+      enabled: false
+
+    record:
+      enabled: true
+      retain:
+        days: 7   #store motion events for 7 days
+        mode: motion
+      events:
+        retain:
+          default: 14 #store ai detected objects for 14 days
+          mode: active_objects
+        pre_capture: 5
+        post_capture: 15
+
+    #motion:
+    #  mask:
+    #    - 515,39,704,38,704,0,513,0 #mask out timestamp
+    ffmpeg:
+      inputs:
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=1 #substream
+          roles:
+            - detect
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=0 #mainstream
+          roles:
+            - record
+
+  Barn_Back:
+    rtmp: # needed to use 2 streams
+      enabled: false
+
+    record:
+      enabled: true
+      retain:
+        days: 7   #store motion events for 7 days
+        mode: motion
+      events:
+        retain:
+          default: 14 #store ai detected objects for 14 days
+          mode: active_objects
+        pre_capture: 5
+        post_capture: 15
+    objects:
+      filters:
+        car:
+          mask:
+            - 102,415,147,400,182,362,167,300,62,265
+            - 192,258,221,282,194,291,165,272
+    #motion:
+    #  mask:
+    #    - 515,39,704,38,704,0,513,0 #mask out timestamp
+    ffmpeg:
+      inputs:
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=1 #substream
+          roles:
+            - detect
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=0 #mainstream
+          roles:
+            - record
+
+  Workshop:
+    rtmp: # needed to use 2 streams
+      enabled: false
+
+    record:
+      enabled: true
+      retain:
+        days: 7   #store motion events for 7 days
+        mode: motion
+      events:
+        retain:
+          default: 14 #store ai detected objects for 14 days
+          mode: active_objects
+        pre_capture: 5
+        post_capture: 15
+
+    #motion:
+    #  mask:
+    #    - 515,39,704,38,704,0,513,0 #mask out timestamp
+    ffmpeg:
+      inputs:
+        - path: rtsp://user:pass\@cam-ip-addr:554/cam/realmonitor?channel=1&subtype=1 #substream
+          roles:
+            - detect
+        - path: rtsp://user:pass\@cam-ip-addr5:554/cam/realmonitor?channel=1&subtype=0 #mainstream
+          roles:
+            - record            
